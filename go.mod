@@ -22,13 +22,8 @@ require (
 	github.com/ugorji/go v1.1.13 // indirect
 	github.com/urfave/cli/v2 v2.2.0
 	go.opencensus.io v0.22.4
-	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
-	golang.org/x/sys v0.0.0-20201107080550-4d91cf3a1aaf // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 )
 
 replace github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi
-
 replace github.com/supranational/blst => ./extern/fil-blst/blst
-
-replace github.com/filecoin-project/fil-blst => ./extern/fil-blst

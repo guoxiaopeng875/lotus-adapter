@@ -5,6 +5,7 @@ import (
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 )
 
 type LotusGatewayAPI interface {
@@ -14,4 +15,6 @@ type LotusGatewayAPI interface {
 	StateGetActor(ctx context.Context, actor address.Address, tsk types.TipSetKey) (*types.Actor, error)
 	// WalletBalance returns the balance of the given address at the current head of the chain.
 	WalletBalance(context.Context, address.Address) (types.BigInt, error)
+	// MinerAssetInfo
+	MinerAssetInfo(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
 }

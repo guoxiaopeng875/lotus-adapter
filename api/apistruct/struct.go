@@ -14,15 +14,20 @@ import (
 
 type LotusGatewayStruct struct {
 	Internal struct {
-		StateMinerInfo func(ctx context.Context, address address.Address, key types.TipSetKey) (miner.MinerInfo, error)
-		StateGetActor  func(ctx context.Context, actor address.Address, tsk types.TipSetKey) (*types.Actor, error)
-		WalletBalance  func(ctx context.Context, address address.Address) (types.BigInt, error)
-		MinerAssetInfo func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
-		WorkerJobs     func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
-		SectorsList    func(ctx context.Context) ([]abi.SectorNumber, error)
-		WorkerStats    func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
-		SectorsStatus  func(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error)
+		StateMinerInfo   func(ctx context.Context, address address.Address, key types.TipSetKey) (miner.MinerInfo, error)
+		StateGetActor    func(ctx context.Context, actor address.Address, tsk types.TipSetKey) (*types.Actor, error)
+		WalletBalance    func(ctx context.Context, address address.Address) (types.BigInt, error)
+		MinerAssetInfo   func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
+		WorkerJobs       func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
+		SectorsList      func(ctx context.Context) ([]abi.SectorNumber, error)
+		WorkerStats      func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
+		SectorsStatus    func(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error)
+		MinerProvingInfo func(ctx context.Context, miner address.Address) (*apitypes.ProvingInfo, error)
 	}
+}
+
+func (l *LotusGatewayStruct) MinerProvingInfo(ctx context.Context, miner address.Address) (*apitypes.ProvingInfo, error) {
+	return l.Internal.MinerProvingInfo(ctx, miner)
 }
 
 func (l *LotusGatewayStruct) SectorsStatus(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error) {

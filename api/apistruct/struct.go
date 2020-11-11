@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
+	api2 "github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
@@ -20,7 +21,12 @@ type LotusGatewayStruct struct {
 		WorkerJobs     func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
 		SectorsList    func(ctx context.Context) ([]abi.SectorNumber, error)
 		WorkerStats    func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
+		SectorsStatus  func(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error)
 	}
+}
+
+func (l *LotusGatewayStruct) SectorsStatus(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error) {
+	return l.Internal.SectorsStatus(ctx, sid, showOnChainInfo)
 }
 
 func (l *LotusGatewayStruct) WorkerStats(ctx context.Context) (map[uint64]storiface.WorkerStats, error) {

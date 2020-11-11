@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"github.com/filecoin-project/go-jsonrpc"
-	lcli "github.com/filecoin-project/lotus/cli"
 	"github.com/gorilla/mux"
+	lcli "github.com/guoxiaopeng875/lotus-adapter/cmd/cli"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/patrickmn/go-cache"
 	"github.com/urfave/cli/v2"

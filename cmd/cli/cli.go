@@ -132,6 +132,7 @@ func GetAPIInfo(ctx *cli.Context, t repo.RepoType) (cliutil.APIInfo, error) {
 		return cliutil.APIInfo{}, xerrors.Errorf("could not expand home dir (%s): %w", repoFlag, err)
 	}
 
+	fmt.Println("------------------------path", p)
 	r, err := repo.NewFS(p)
 	if err != nil {
 		return cliutil.APIInfo{}, xerrors.Errorf("could not open repo at path: %s; %w", p, err)

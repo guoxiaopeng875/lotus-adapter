@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/gorilla/mux"
 	lcli "github.com/guoxiaopeng875/lotus-adapter/cmd/cli"
@@ -36,6 +37,12 @@ func main() {
 				Name:    "repo",
 				EnvVars: []string{"LOTUS_PATH"},
 				Value:   "~/.lotus", // TODO: Consider XDG_DATA_HOME
+			},
+			&cli.StringFlag{
+				Name:    "miner-repo",
+				EnvVars: []string{"LOTUS_MINER_PATH", "LOTUS_STORAGE_PATH"},
+				Value:   "~/.lotusminer", // TODO: Consider XDG_DATA_HOME
+				Usage:   fmt.Sprintf("Specify miner repo path.  env(LOTUS_STORAGE_PATH) are DEPRECATION, will REMOVE SOON"),
 			},
 		},
 	}

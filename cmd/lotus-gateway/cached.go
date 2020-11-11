@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/api/apibstore"
 	"github.com/filecoin-project/lotus/chain/actors/adt"
+	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
 	"github.com/filecoin-project/lotus/lib/blockstore"
 	"github.com/filecoin-project/lotus/lib/bufbstore"
 	"github.com/filecoin-project/lotus/storage"
@@ -20,12 +22,41 @@ import (
 )
 
 func NewCachedFullNode(under api.FullNode, cache *cache.Cache) *CachedFullNode {
-	return &CachedFullNode{under: under, cache: cache}
+	return &CachedFullNode{nodeApi: under, cache: cache}
 }
 
 type CachedFullNode struct {
-	under api.FullNode
-	cache *cache.Cache
+	nodeApi  api.FullNode
+	minerApi api.StorageMiner
+	cache    *cache.Cache
+}
+
+func (c *CachedFullNode) SectorsList(ctx context.Context) ([]abi.SectorNumber, error) {
+	k := fmt.Sprintf("SectorsList")
+	cachedData, exist := c.cache.Get(k)
+	if exist {
+		return cachedData.([]abi.SectorNumber), nil
+	}
+	info, err := c.minerApi.SectorsList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	c.cache.SetDefault(k, info)
+	return info, nil
+}
+
+func (c *CachedFullNode) WorkerJobs(ctx context.Context) (map[uint64][]storiface.WorkerJob, error) {
+	k := fmt.Sprintf("WorkerJobs")
+	cachedData, exist := c.cache.Get(k)
+	if exist {
+		return cachedData.(map[uint64][]storiface.WorkerJob), nil
+	}
+	info, err := c.minerApi.WorkerJobs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	c.cache.SetDefault(k, info)
+	return info, nil
 }
 
 func (c *CachedFullNode) MinerAssetInfo(ctx context.Context, mAddr address.Address) (*apitypes.ClusterAssetInfo, error) {
@@ -43,15 +74,15 @@ func (c *CachedFullNode) MinerAssetInfo(ctx context.Context, mAddr address.Addre
 }
 
 func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Address) (*apitypes.ClusterAssetInfo, error) {
-	mi, err := c.under.StateMinerInfo(ctx, mAddr, types.EmptyTSK)
+	mi, err := c.nodeApi.StateMinerInfo(ctx, mAddr, types.EmptyTSK)
 	if err != nil {
 		return nil, err
 	}
-	mAct, err := c.under.StateGetActor(ctx, mAddr, types.EmptyTSK)
+	mAct, err := c.nodeApi.StateGetActor(ctx, mAddr, types.EmptyTSK)
 	if err != nil {
 		return nil, err
 	}
-	tbs := bufbstore.NewTieredBstore(apibstore.NewAPIBlockstore(c.under), blockstore.NewTemporary())
+	tbs := bufbstore.NewTieredBstore(apibstore.NewAPIBlockstore(c.nodeApi), blockstore.NewTemporary())
 	mas, err := miner.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbs)), mAct)
 	if err != nil {
 		return nil, err
@@ -64,11 +95,11 @@ func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Addre
 	if err != nil {
 		return nil, err
 	}
-	postAddr, err := storage.AddressFor(ctx, c.under, mi, storage.PoStAddr, types.FromFil(1))
+	postAddr, err := storage.AddressFor(ctx, c.nodeApi, mi, storage.PoStAddr, types.FromFil(1))
 	if err != nil {
 		return nil, xerrors.Errorf("getting address for post: %w", err)
 	}
-	postBls, err := c.under.WalletBalance(ctx, postAddr)
+	postBls, err := c.nodeApi.WalletBalance(ctx, postAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +120,7 @@ func (c *CachedFullNode) WalletBalance(ctx context.Context, address address.Addr
 	if exist {
 		return cachedData.(types.BigInt), nil
 	}
-	wb, err := c.under.WalletBalance(ctx, address)
+	wb, err := c.nodeApi.WalletBalance(ctx, address)
 	if err != nil {
 		return types.EmptyInt, err
 	}
@@ -103,7 +134,7 @@ func (c *CachedFullNode) StateGetActor(ctx context.Context, actor address.Addres
 	if exist {
 		return cachedData.(*types.Actor), nil
 	}
-	act, err := c.under.StateGetActor(ctx, actor, tsk)
+	act, err := c.nodeApi.StateGetActor(ctx, actor, tsk)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +148,7 @@ func (c *CachedFullNode) StateMinerInfo(ctx context.Context, address address.Add
 	if exist {
 		return cachedData.(miner.MinerInfo), nil
 	}
-	mi, err := c.under.StateMinerInfo(ctx, address, key)
+	mi, err := c.nodeApi.StateMinerInfo(ctx, address, key)
 	if err != nil {
 		return miner.MinerInfo{}, err
 	}

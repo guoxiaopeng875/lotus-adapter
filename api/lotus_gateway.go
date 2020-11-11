@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"github.com/filecoin-project/go-address"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
 	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 )
 
@@ -17,4 +19,9 @@ type LotusGatewayAPI interface {
 	WalletBalance(context.Context, address.Address) (types.BigInt, error)
 	// MinerAssetInfo
 	MinerAssetInfo(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
+	// -----------minerAPI-------------
+	// WorkerJobs
+	WorkerJobs(context.Context) (map[uint64][]storiface.WorkerJob, error)
+	// SectorsList
+	SectorsList(ctx context.Context) ([]abi.SectorNumber, error)
 }

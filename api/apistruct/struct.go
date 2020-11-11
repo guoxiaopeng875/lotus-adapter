@@ -3,8 +3,10 @@ package apistruct
 import (
 	"context"
 	"github.com/filecoin-project/go-address"
+	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
 	"github.com/guoxiaopeng875/lotus-adapter/api"
 	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 )
@@ -15,7 +17,17 @@ type LotusGatewayStruct struct {
 		StateGetActor  func(ctx context.Context, actor address.Address, tsk types.TipSetKey) (*types.Actor, error)
 		WalletBalance  func(ctx context.Context, address address.Address) (types.BigInt, error)
 		MinerAssetInfo func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
+		WorkerJobs     func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
+		SectorsList    func(ctx context.Context) ([]abi.SectorNumber, error)
 	}
+}
+
+func (l *LotusGatewayStruct) SectorsList(ctx context.Context) ([]abi.SectorNumber, error) {
+	return l.Internal.SectorsList(ctx)
+}
+
+func (l *LotusGatewayStruct) WorkerJobs(ctx context.Context) (map[uint64][]storiface.WorkerJob, error) {
+	return l.Internal.WorkerJobs(ctx)
 }
 
 func (l *LotusGatewayStruct) StateMinerInfo(ctx context.Context, a address.Address, key types.TipSetKey) (miner.MinerInfo, error) {

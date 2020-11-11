@@ -31,6 +31,20 @@ type CachedFullNode struct {
 	cache    *cache.Cache
 }
 
+func (c *CachedFullNode) WorkerStats(ctx context.Context) (map[uint64]storiface.WorkerStats, error) {
+	k := fmt.Sprintf("WorkerStats")
+	cachedData, exist := c.cache.Get(k)
+	if exist {
+		return cachedData.(map[uint64]storiface.WorkerStats), nil
+	}
+	info, err := c.minerApi.WorkerStats(ctx)
+	if err != nil {
+		return nil, err
+	}
+	c.cache.SetDefault(k, info)
+	return info, nil
+}
+
 func (c *CachedFullNode) SectorsList(ctx context.Context) ([]abi.SectorNumber, error) {
 	k := fmt.Sprintf("SectorsList")
 	cachedData, exist := c.cache.Get(k)

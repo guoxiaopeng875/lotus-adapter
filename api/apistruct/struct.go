@@ -19,7 +19,12 @@ type LotusGatewayStruct struct {
 		MinerAssetInfo func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
 		WorkerJobs     func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
 		SectorsList    func(ctx context.Context) ([]abi.SectorNumber, error)
+		WorkerStats    func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
 	}
+}
+
+func (l *LotusGatewayStruct) WorkerStats(ctx context.Context) (map[uint64]storiface.WorkerStats, error) {
+	return l.Internal.WorkerStats(ctx)
 }
 
 func (l *LotusGatewayStruct) SectorsList(ctx context.Context) ([]abi.SectorNumber, error) {

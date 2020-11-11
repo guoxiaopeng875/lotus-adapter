@@ -24,4 +24,6 @@ type LotusGatewayAPI interface {
 	WorkerJobs(context.Context) (map[uint64][]storiface.WorkerJob, error)
 	// SectorsList
 	SectorsList(ctx context.Context) ([]abi.SectorNumber, error)
+	// WorkerStats
+	WorkerStats(context.Context) (map[uint64]storiface.WorkerStats, error)
 }

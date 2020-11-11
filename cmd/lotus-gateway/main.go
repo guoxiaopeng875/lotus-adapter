@@ -86,6 +86,12 @@ var runCmd = &cli.Command{
 		}
 		defer closer()
 
+		minerApi, mCloser, err := lcli.GetStorageMinerAPI(cctx)
+		if err != nil {
+			return err
+		}
+		defer mCloser()
+
 		address := cctx.String("listen")
 		mux := mux.NewRouter()
 
@@ -93,7 +99,7 @@ var runCmd = &cli.Command{
 
 		rpcServer := jsonrpc.NewServer()
 		c := cache.New(cctx.Duration("expiration"), cctx.Duration("interval"))
-		rpcServer.Register("Filecoin", NewCachedFullNode(api, c))
+		rpcServer.Register("Filecoin", NewCachedFullNode(api, minerApi, c))
 
 		mux.Handle("/rpc/v0", rpcServer)
 		mux.PathPrefix("/").Handler(http.DefaultServeMux)

@@ -31,6 +31,13 @@ func main() {
 		Usage:    "lotus cached api",
 		Version:  build.UserVersion(),
 		Commands: local,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "repo",
+				EnvVars: []string{"LOTUS_PATH"},
+				Value:   "~/.lotus", // TODO: Consider XDG_DATA_HOME
+			},
+		},
 	}
 	app.Setup()
 

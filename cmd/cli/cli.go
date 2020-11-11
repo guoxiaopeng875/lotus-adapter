@@ -127,7 +127,6 @@ func GetAPIInfo(ctx *cli.Context, t repo.RepoType) (cliutil.APIInfo, error) {
 
 	repoFlag := flagForRepo(t)
 
-	fmt.Println("------------------------ctx.String(repoFlag)", ctx.String(repoFlag))
 	p, err := homedir.Expand(ctx.String(repoFlag))
 	if err != nil {
 		return cliutil.APIInfo{}, xerrors.Errorf("could not expand home dir (%s): %w", repoFlag, err)

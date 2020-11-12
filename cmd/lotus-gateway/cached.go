@@ -236,6 +236,10 @@ func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Addre
 	if err != nil {
 		return nil, err
 	}
+	wBls, err := c.nodeApi.WalletBalance(ctx, mi.Worker)
+	if err != nil {
+		return nil, err
+	}
 	return &apitypes.ClusterAssetInfo{
 		MinerID:                  mAddr.String(),
 		MinerBalance:             mAct.Balance,
@@ -244,6 +248,7 @@ func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Addre
 		PreCommitDeposits:        lockedFunds.PreCommitDeposits,
 		AvailableBalance:         availBalance,
 		PostBalance:              postBls,
+		WorkerBalance:            wBls,
 	}, nil
 }
 

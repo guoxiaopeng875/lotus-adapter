@@ -21,6 +21,8 @@ type ClusterAssetInfo struct {
 	AvailableBalance abi.TokenAmount `json:"available_balance"`
 	// POST
 	PostBalance big.Int `json:"post_balance"`
+	// Worker
+	WorkerBalance big.Int `json:"worker_balance"`
 }
 
 type ProvingInfo struct {

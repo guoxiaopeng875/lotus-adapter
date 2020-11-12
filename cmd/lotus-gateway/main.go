@@ -120,6 +120,11 @@ var runCmd = &cli.Command{
 		if err != nil {
 			return err
 		}
+		data, err := AuthNew([]auth.Permission{"admin"}, secret)
+		if err != nil {
+			return err
+		}
+		log.Info(string(data))
 		gwAPI := NewCachedFullNode(api, minerApi, c, secret)
 		rpcServer.Register("Filecoin", gwAPI)
 

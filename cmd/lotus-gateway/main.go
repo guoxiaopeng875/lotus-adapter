@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/filecoin-project/go-jsonrpc"
+	"github.com/filecoin-project/go-jsonrpc/auth"
+	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/node/repo"
 	"github.com/gorilla/mux"
 	lcli "github.com/guoxiaopeng875/lotus-adapter/cmd/cli"
 	logging "github.com/ipfs/go-log/v2"
@@ -33,6 +36,11 @@ func main() {
 		Version:  build.UserVersion(),
 		Commands: local,
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "gw-repo",
+				EnvVars: []string{"LOTUS_GW_PATH"},
+				Value:   "~/.lotusgw",
+			},
 			&cli.StringFlag{
 				Name:    "repo",
 				EnvVars: []string{"LOTUS_PATH"},
@@ -99,18 +107,31 @@ var runCmd = &cli.Command{
 
 		rpcServer := jsonrpc.NewServer()
 		c := cache.New(cctx.Duration("expiration"), cctx.Duration("interval"))
-		rpcServer.Register("Filecoin", NewCachedFullNode(api, minerApi, c))
+
+		fs, err := repo.NewFS(cctx.String("gw-repo"))
+		if err != nil {
+			return err
+		}
+		ks, err := fs.Lock(repo.FullNode)
+		if err != nil {
+			return err
+		}
+		secret, err := APISecret(ks.(types.KeyStore), ks)
+		if err != nil {
+			return err
+		}
+		rpcServer.Register("Filecoin", NewCachedFullNode(api, minerApi, c, secret))
 
 		mux.Handle("/rpc/v0", rpcServer)
 		mux.PathPrefix("/").Handler(http.DefaultServeMux)
 
-		/*ah := &auth.Handler{
-			Verify: nodeApi.AuthVerify,
+		ah := &auth.Handler{
+			Verify: api.AuthVerify,
 			Next:   mux.ServeHTTP,
-		}*/
+		}
 
 		srv := &http.Server{
-			Handler: mux,
+			Handler: ah,
 		}
 
 		go func() {

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/filecoin-project/go-jsonrpc/auth"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/lotus/api"
 	"github.com/filecoin-project/lotus/api/apibstore"
@@ -13,6 +14,7 @@ import (
 	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
 	"github.com/filecoin-project/lotus/lib/blockstore"
 	"github.com/filecoin-project/lotus/lib/bufbstore"
+	"github.com/filecoin-project/lotus/node/modules/dtypes"
 	"github.com/filecoin-project/lotus/storage"
 	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 	"github.com/hako/durafmt"
@@ -26,14 +28,19 @@ import (
 	"github.com/filecoin-project/lotus/chain/types"
 )
 
-func NewCachedFullNode(nodeApi api.FullNode, minerApi api.StorageMiner, cache *cache.Cache) *CachedFullNode {
+func NewCachedFullNode(nodeApi api.FullNode, minerApi api.StorageMiner, cache *cache.Cache, apiAlg *dtypes.APIAlg) *CachedFullNode {
 	return &CachedFullNode{nodeApi: nodeApi, minerApi: minerApi, cache: cache}
 }
 
 type CachedFullNode struct {
-	nodeApi  api.FullNode
-	minerApi api.StorageMiner
-	cache    *cache.Cache
+	APISecret *dtypes.APIAlg
+	nodeApi   api.FullNode
+	minerApi  api.StorageMiner
+	cache     *cache.Cache
+}
+
+func (c *CachedFullNode) AuthVerify(_ context.Context, token string) ([]auth.Permission, error) {
+	return AuthVerify(token, c.APISecret)
 }
 
 func (c *CachedFullNode) MinerProvingInfo(ctx context.Context, miner address.Address) (*apitypes.ProvingInfo, error) {

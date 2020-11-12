@@ -120,13 +120,14 @@ var runCmd = &cli.Command{
 		if err != nil {
 			return err
 		}
-		rpcServer.Register("Filecoin", NewCachedFullNode(api, minerApi, c, secret))
+		gwAPI := NewCachedFullNode(api, minerApi, c, secret)
+		rpcServer.Register("Filecoin", gwAPI)
 
 		mux.Handle("/rpc/v0", rpcServer)
 		mux.PathPrefix("/").Handler(http.DefaultServeMux)
 
 		ah := &auth.Handler{
-			Verify: api.AuthVerify,
+			Verify: gwAPI.AuthVerify,
 			Next:   mux.ServeHTTP,
 		}
 

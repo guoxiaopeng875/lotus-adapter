@@ -28,8 +28,8 @@ import (
 	"github.com/filecoin-project/lotus/chain/types"
 )
 
-func NewCachedFullNode(nodeApi api.FullNode, minerApi api.StorageMiner, cache *cache.Cache, apiAlg *dtypes.APIAlg) *CachedFullNode {
-	return &CachedFullNode{nodeApi: nodeApi, minerApi: minerApi, cache: cache}
+func NewCachedFullNode(nodeApi api.FullNode, minerApi api.StorageMiner, cache *cache.Cache, secret *dtypes.APIAlg) *CachedFullNode {
+	return &CachedFullNode{nodeApi: nodeApi, minerApi: minerApi, cache: cache, APISecret: secret}
 }
 
 type CachedFullNode struct {

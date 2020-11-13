@@ -67,6 +67,9 @@ dist-clean:
 	git submodule deinit --all -f
 .PHONY: dist-clean
 
+2k: GOFLAGS+=-tags=2k
+2k: lotus-gateway
+
 lotus-gateway: $(BUILD_DEPS)
 	rm -f lotus-gateway
 	go build $(GOFLAGS) -o lotus-gateway ./cmd/lotus-gateway

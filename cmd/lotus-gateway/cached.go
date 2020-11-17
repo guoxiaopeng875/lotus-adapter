@@ -168,7 +168,7 @@ func (c *CachedFullNode) WorkerStats(ctx context.Context) (map[uuid.UUID]storifa
 	if err != nil {
 		return nil, err
 	}
-	c.cache.SetDefault(k, info)
+	c.cache.Set(k, info, time.Second)
 	return info, nil
 }
 
@@ -196,7 +196,7 @@ func (c *CachedFullNode) WorkerJobs(ctx context.Context) (map[uuid.UUID][]storif
 	if err != nil {
 		return nil, err
 	}
-	c.cache.SetDefault(k, info)
+	c.cache.Set(k, info, time.Second)
 	return info, nil
 }
 

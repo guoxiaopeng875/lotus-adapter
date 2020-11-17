@@ -223,6 +223,10 @@ func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Addre
 	if err != nil {
 		return nil, err
 	}
+	power, err := c.nodeApi.StateMinerPower(ctx, mAddr, types.EmptyTSK)
+	if err != nil {
+		return nil, err
+	}
 	tbs := bufbstore.NewTieredBstore(apibstore.NewAPIBlockstore(c.nodeApi), blockstore.NewTemporary())
 	mas, err := miner.Load(adt.WrapStore(ctx, cbor.NewCborStore(tbs)), mAct)
 	if err != nil {
@@ -257,6 +261,7 @@ func (c *CachedFullNode) minerAssetInfo(ctx context.Context, mAddr address.Addre
 		AvailableBalance:         availBalance,
 		PostBalance:              postBls,
 		WorkerBalance:            wBls,
+		QualityAdjPower:          power.MinerPower.QualityAdjPower,
 	}, nil
 }
 

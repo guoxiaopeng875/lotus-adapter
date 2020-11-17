@@ -22,7 +22,8 @@ type ClusterAssetInfo struct {
 	// POST
 	PostBalance big.Int `json:"post_balance"`
 	// Worker
-	WorkerBalance big.Int `json:"worker_balance"`
+	WorkerBalance   big.Int          `json:"worker_balance"`
+	QualityAdjPower abi.StoragePower `json:"quality_adj_power"`
 }
 
 type ProvingInfo struct {

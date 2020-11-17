@@ -21,7 +21,7 @@ type LotusGatewayStruct struct {
 		MinerAssetInfo   func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
 		WorkerJobs       func(ctx context.Context) (map[uuid.UUID][]storiface.WorkerJob, error)
 		SectorsList      func(ctx context.Context) ([]abi.SectorNumber, error)
-		WorkerStats      func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
+		WorkerStats      func(ctx context.Context) (map[uuid.UUID]storiface.WorkerStats, error)
 		SectorsStatus    func(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error)
 		MinerProvingInfo func(ctx context.Context, miner address.Address) (*apitypes.ProvingInfo, error)
 	}
@@ -35,7 +35,7 @@ func (l *LotusGatewayStruct) SectorsStatus(ctx context.Context, sid abi.SectorNu
 	return l.Internal.SectorsStatus(ctx, sid, showOnChainInfo)
 }
 
-func (l *LotusGatewayStruct) WorkerStats(ctx context.Context) (map[uint64]storiface.WorkerStats, error) {
+func (l *LotusGatewayStruct) WorkerStats(ctx context.Context) (map[uuid.UUID]storiface.WorkerStats, error) {
 	return l.Internal.WorkerStats(ctx)
 }
 

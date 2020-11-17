@@ -27,7 +27,7 @@ type LotusGatewayAPI interface {
 	// SectorsList
 	SectorsList(ctx context.Context) ([]abi.SectorNumber, error)
 	// WorkerStats
-	WorkerStats(context.Context) (map[uint64]storiface.WorkerStats, error)
+	WorkerStats(context.Context) (map[uuid.UUID]storiface.WorkerStats, error)
 	// SectorsStatus
 	SectorsStatus(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api.SectorInfo, error)
 	// MinerProvingInfo

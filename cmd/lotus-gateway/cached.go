@@ -158,11 +158,11 @@ func (c *CachedFullNode) SectorsStatus(ctx context.Context, sid abi.SectorNumber
 	return info, nil
 }
 
-func (c *CachedFullNode) WorkerStats(ctx context.Context) (map[uint64]storiface.WorkerStats, error) {
+func (c *CachedFullNode) WorkerStats(ctx context.Context) (map[uuid.UUID]storiface.WorkerStats, error) {
 	k := fmt.Sprintf("WorkerStats")
 	cachedData, exist := c.cache.Get(k)
 	if exist {
-		return cachedData.(map[uint64]storiface.WorkerStats), nil
+		return cachedData.(map[uuid.UUID]storiface.WorkerStats), nil
 	}
 	info, err := c.minerApi.WorkerStats(ctx)
 	if err != nil {

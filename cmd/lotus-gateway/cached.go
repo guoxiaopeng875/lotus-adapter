@@ -16,6 +16,7 @@ import (
 	"github.com/filecoin-project/lotus/lib/bufbstore"
 	"github.com/filecoin-project/lotus/node/modules/dtypes"
 	"github.com/filecoin-project/lotus/storage"
+	"github.com/google/uuid"
 	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 	"github.com/hako/durafmt"
 	cbor "github.com/ipfs/go-ipld-cbor"
@@ -185,11 +186,11 @@ func (c *CachedFullNode) SectorsList(ctx context.Context) ([]abi.SectorNumber, e
 	return info, nil
 }
 
-func (c *CachedFullNode) WorkerJobs(ctx context.Context) (map[uint64][]storiface.WorkerJob, error) {
+func (c *CachedFullNode) WorkerJobs(ctx context.Context) (map[uuid.UUID][]storiface.WorkerJob, error) {
 	k := fmt.Sprintf("WorkerJobs")
 	cachedData, exist := c.cache.Get(k)
 	if exist {
-		return cachedData.(map[uint64][]storiface.WorkerJob), nil
+		return cachedData.(map[uuid.UUID][]storiface.WorkerJob), nil
 	}
 	info, err := c.minerApi.WorkerJobs(ctx)
 	if err != nil {

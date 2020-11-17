@@ -8,6 +8,7 @@ import (
 	"github.com/filecoin-project/lotus/chain/actors/builtin/miner"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/extern/sector-storage/storiface"
+	"github.com/google/uuid"
 	"github.com/guoxiaopeng875/lotus-adapter/api"
 	"github.com/guoxiaopeng875/lotus-adapter/api/apitypes"
 )
@@ -18,7 +19,7 @@ type LotusGatewayStruct struct {
 		StateGetActor    func(ctx context.Context, actor address.Address, tsk types.TipSetKey) (*types.Actor, error)
 		WalletBalance    func(ctx context.Context, address address.Address) (types.BigInt, error)
 		MinerAssetInfo   func(ctx context.Context, miner address.Address) (*apitypes.ClusterAssetInfo, error)
-		WorkerJobs       func(ctx context.Context) (map[uint64][]storiface.WorkerJob, error)
+		WorkerJobs       func(ctx context.Context) (map[uuid.UUID][]storiface.WorkerJob, error)
 		SectorsList      func(ctx context.Context) ([]abi.SectorNumber, error)
 		WorkerStats      func(ctx context.Context) (map[uint64]storiface.WorkerStats, error)
 		SectorsStatus    func(ctx context.Context, sid abi.SectorNumber, showOnChainInfo bool) (api2.SectorInfo, error)
@@ -42,7 +43,7 @@ func (l *LotusGatewayStruct) SectorsList(ctx context.Context) ([]abi.SectorNumbe
 	return l.Internal.SectorsList(ctx)
 }
 
-func (l *LotusGatewayStruct) WorkerJobs(ctx context.Context) (map[uint64][]storiface.WorkerJob, error) {
+func (l *LotusGatewayStruct) WorkerJobs(ctx context.Context) (map[uuid.UUID][]storiface.WorkerJob, error) {
 	return l.Internal.WorkerJobs(ctx)
 }
 

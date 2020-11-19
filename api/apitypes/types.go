@@ -1,6 +1,7 @@
 package apitypes
 
 import (
+	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/big"
 	"time"
@@ -49,6 +50,7 @@ type MinerSectorsInfo struct {
 }
 
 type PushedMinerInfo struct {
+	MinerAddr        address.Address    `json:"miner_addr"`
 	ProvingInfo      *ProvingInfo       `json:"proving_info"`
 	MinerSectorsInfo *MinerSectorsInfo  `json:"miner_sectors_info"`
 	WorkerTaskState  []*WorkerTaskState `json:"worker_task_state"`

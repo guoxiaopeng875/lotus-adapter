@@ -3,6 +3,7 @@ package apitypes
 import (
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/big"
+	"time"
 )
 
 // FIL相关都是以attoFIL为单位
@@ -40,4 +41,33 @@ type ProvingInfo struct {
 	DeadlineElapsed       string         `json:"deadline_elapsed"`
 	DeadlineChallenge     string         `json:"deadline_challenge"`
 	DeadlineFaultCutoff   string         `json:"deadline_fault_cutoff"`
+}
+
+type MinerSectorsInfo struct {
+	TotalSectors int `json:"total_sectors"`
+	Proving      int `json:"proving"`
+}
+
+type PushedMinerInfo struct {
+	ProvingInfo      *ProvingInfo       `json:"proving_info"`
+	MinerSectorsInfo *MinerSectorsInfo  `json:"miner_sectors_info"`
+	WorkerTaskState  []*WorkerTaskState `json:"worker_task_state"`
+	ClusterAssetInfo *ClusterAssetInfo  `json:"cluster_asset_info"`
+}
+
+// worker任务状态
+type WorkerTaskState struct {
+	// workerID
+	ID           string         `json:"id"`
+	Hostname     string         `json:"hostname"`
+	Enable       bool           `json:"enable"`
+	SectorStates []*SectorState `json:"sector_states"`
+}
+
+type SectorState struct {
+	Task      string    `json:"task"`
+	SectorNum uint64    `json:"sector_num"`
+	Start     time.Time `json:"start"`
+	RunWait   int       `json:"run_wait"` // 0 - running, 1+ - assigned
+	TaskTime  int64     `json:"task_time,omitempty"`
 }

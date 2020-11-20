@@ -79,5 +79,5 @@ BINS+=lotus-gateway
 lotus-monitor: $(BUILD_DEPS)
 	rm -f lotus-monitor
 	go build $(GOFLAGS) -o lotus-monitor ./cmd/lotus-monitor
-.PHONY: lotus-miner-gateway
+.PHONY: lotus-monitor
 BINS+=lotus-monitor

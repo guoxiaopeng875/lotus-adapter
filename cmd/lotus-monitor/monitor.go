@@ -13,13 +13,14 @@ import (
 
 type Processor struct {
 	// minerID: lotusAPI
-	apis     map[address.Address]*apiwrapper.LotusAPIWrapper
-	cli      *resty.Client
-	proxyUrl string
+	apis         map[address.Address]*apiwrapper.LotusAPIWrapper
+	cli          *resty.Client
+	proxyUrl     string
+	proxyHeaders map[string]string
 }
 
-func NewProcessor(apis map[address.Address]*apiwrapper.LotusAPIWrapper, cli *resty.Client, proxyUrl string) *Processor {
-	return &Processor{apis: apis, cli: cli, proxyUrl: proxyUrl}
+func NewProcessor(apis map[address.Address]*apiwrapper.LotusAPIWrapper, cli *resty.Client, proxyUrl string, headers map[string]string) *Processor {
+	return &Processor{apis: apis, cli: cli, proxyUrl: proxyUrl, proxyHeaders: headers}
 }
 
 func (p *Processor) PushAll() error {
@@ -38,7 +39,7 @@ func (p *Processor) PushAll() error {
 }
 
 func (p *Processor) do(body interface{}) error {
-	resp, err := p.cli.R().SetBody(body).Post(p.proxyUrl)
+	resp, err := p.cli.R().SetHeaders(p.proxyHeaders).SetBody(body).Post(p.proxyUrl)
 	if err != nil {
 		return err
 	}

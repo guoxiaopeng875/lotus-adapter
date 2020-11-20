@@ -61,6 +61,11 @@ var runCmd = &cli.Command{
 			Usage: "set monitor-center url",
 			Value: "",
 		},
+		&cli.StringFlag{
+			Name:  "proxy-token",
+			Usage: "set monitor-center token",
+			Value: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiZnhpbmdnb25nIn0.vm8FX1p_I3sLlFoHtLqQrv7sITuLYOVgo-9dTbxIcUFUcwsHrYbgwU4qR1G8Sc7waoVETjkGyjf5I1buTAzvEA6ACAil4yxGMRQKmTH4IT1t2nffPHeD5qqlj2fetceue8tI2gAWB_qhrg-1khGDhU55CzsGGmrVpgRhAZfVww_AA1VvXhRxiPJdD6klFjai8eg4zWVP956lL_YmEc50mfvV-XRzAeE0rgC-gowcZH4_XjiSn3i4OaD3iPd2oEV0zS8W3vNz46sWxlefKBaGqK3mHitdKI3_yl85l29PhxdGpbIrZhhhnKX1ywu4RjBnXxHW6whodJdPNXJIb49ikw",
+		},
 		&cli.DurationFlag{
 			Name:  "interval",
 			Usage: "set monitor interval",
@@ -105,7 +110,10 @@ var runCmd = &cli.Command{
 		}
 		processor := NewProcessor(map[address.Address]*apiwrapper.LotusAPIWrapper{
 			mAddr: apiwrapper.NewLotusAPIWrapper(api, minerApi),
-		}, resty.New(), cctx.String("proxy"))
+		}, resty.New(), cctx.String("proxy"), map[string]string{
+			"name":  "fxinggong",
+			"token": cctx.String("proxy-token"),
+		})
 
 		tick := time.Tick(cctx.Duration("interval"))
 		for {

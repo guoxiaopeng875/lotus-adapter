@@ -66,12 +66,23 @@ var runCmd = &cli.Command{
 			Usage: "set monitor interval",
 			Value: time.Minute,
 		},
+		&cli.StringFlag{
+			Name:    "log-level",
+			EnvVars: []string{"GOLOG_LOG_LEVEL"},
+			Value:   "info",
+		},
 	},
 	Action: func(cctx *cli.Context) error {
 		log.Info("Starting lotus monitor")
 		go func() {
 			http.ListenAndServe(":8875", nil) //nolint:errcheck
 		}()
+
+		logLvl := cctx.String("log-level")
+		if err := logging.SetLogLevel("*", logLvl); err != nil {
+			return err
+		}
+
 		ctx := lcli.ReqContext(cctx)
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()

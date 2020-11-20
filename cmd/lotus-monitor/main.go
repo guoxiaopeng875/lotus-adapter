@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/build"
-	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/lib/lotuslog"
 	"github.com/guoxiaopeng875/lotus-adapter/apiwrapper"
 	lcli "github.com/guoxiaopeng875/lotus-adapter/cmd/cli"
@@ -106,10 +105,6 @@ var runCmd = &cli.Command{
 		defer mCloser()
 
 		mAddr, err := minerApi.ActorAddress(ctx)
-		if err != nil {
-			return err
-		}
-		mi, err := api.StateMinerInfo(ctx, mAddr, types.EmptyTSK)
 		if err != nil {
 			return err
 		}

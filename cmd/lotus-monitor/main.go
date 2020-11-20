@@ -119,7 +119,7 @@ var runCmd = &cli.Command{
 		for {
 			select {
 			case <-tick:
-				log.Debug("push lotus miner info")
+				log.Info("push lotus miner info")
 				if err := processor.PushAll(); err != nil {
 					log.Errorf("push lotus miner info failed, %w", err)
 				}

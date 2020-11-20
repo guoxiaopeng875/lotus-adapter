@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.7.4
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/ipfs/go-ipld-cbor v0.0.5

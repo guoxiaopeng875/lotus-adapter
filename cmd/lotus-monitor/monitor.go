@@ -67,7 +67,7 @@ func (p *Processor) getPushedMinerInfo(mAddr address.Address, apiWrapper *apiwra
 		return nil, err
 	}
 	return &apitypes.PushedMinerInfo{
-		MinerAddr:        mAddr,
+		MinerID:          mAddr.String(),
 		ProvingInfo:      pi,
 		MinerSectorsInfo: si,
 		WorkerTaskState:  wti,

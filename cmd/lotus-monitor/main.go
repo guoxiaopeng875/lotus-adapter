@@ -104,6 +104,9 @@ var runCmd = &cli.Command{
 				if err := processor.PushAll(); err != nil {
 					log.Errorf("push lotus miner info failed, %w", err)
 				}
+			case <-ctx.Done():
+				log.Warn("Shutdown...")
+				return nil
 			}
 		}
 

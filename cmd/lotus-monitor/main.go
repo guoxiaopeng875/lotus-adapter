@@ -114,7 +114,10 @@ var runCmd = &cli.Command{
 			"name":  "fxinggong",
 			"token": cctx.String("proxy-token"),
 		})
-
+		if err := processor.PushAll(); err != nil {
+			log.Errorf("push lotus miner info failed, %w", err)
+			return err
+		}
 		tick := time.Tick(cctx.Duration("interval"))
 		for {
 			select {

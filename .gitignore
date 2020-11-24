@@ -2,3 +2,5 @@
 tmp
 build/.filecoin-install
 build/.update-modules
+
+lotus-*

@@ -81,3 +81,9 @@ lotus-monitor: $(BUILD_DEPS)
 	go build $(GOFLAGS) -o lotus-monitor ./cmd/lotus-monitor
 .PHONY: lotus-monitor
 BINS+=lotus-monitor
+
+lotus-chainwatch:
+	rm -f lotus-chainwatch
+	go build $(GOFLAGS) -o lotus-chainwatch ./cmd/lotus-chainwatch
+.PHONY: lotus-chainwatch
+BINS+=lotus-chainwatch

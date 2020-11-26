@@ -7,6 +7,7 @@ require (
 	github.com/filecoin-project/go-jsonrpc v0.1.2-0.20201008195726-68c6a2704e49
 	github.com/filecoin-project/go-state-types v0.0.0-20201102161440-c8033295a1fc
 	github.com/filecoin-project/lotus v1.2.1
+	github.com/filecoin-project/specs-actors v0.9.13
 	github.com/gbrlsnchs/jwt/v3 v3.0.0-beta.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect

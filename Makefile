@@ -87,3 +87,9 @@ lotus-chainwatch:
 	go build $(GOFLAGS) -o lotus-chainwatch ./cmd/lotus-chainwatch
 .PHONY: lotus-chainwatch
 BINS+=lotus-chainwatch
+
+lotus-wallet-cli:
+	rm -f lotus-wallet-cli
+	go build $(GOFLAGS) -o lotus-wallet-cli ./cmd/lotus-wallet-cli
+.PHONY: lotus-wallet-cli
+BINS+=lotus-wallet-cli

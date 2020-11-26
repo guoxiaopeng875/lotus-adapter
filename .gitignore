@@ -4,3 +4,4 @@ build/.filecoin-install
 build/.update-modules
 
 /lotus-chainwatch
+/lotus-wallet-cli

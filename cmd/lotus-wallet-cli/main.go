@@ -11,8 +11,6 @@ import (
 	"github.com/filecoin-project/lotus/chain/actors"
 	multisig0 "github.com/filecoin-project/lotus/chain/actors/builtin/multisig"
 	"github.com/filecoin-project/lotus/chain/types"
-	"github.com/filecoin-project/specs-actors/actors/builtin"
-	"github.com/filecoin-project/specs-actors/actors/builtin/multisig"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/xerrors"
@@ -489,68 +487,6 @@ func signMsg(ctx context.Context, walletAPI api.WalletAPI, msg *types.Message) (
 		return "", err
 	}
 	return hex.EncodeToString(smBytes), nil
-}
-
-func parseProposeMessageFromContext(cctx *cli.Context) (*types.Message, error) {
-	msig, err := address.NewFromString(cctx.Args().Get(0))
-	if err != nil {
-		return nil, err
-	}
-
-	dest, err := address.NewFromString(cctx.Args().Get(1))
-	if err != nil {
-		return nil, err
-	}
-
-	value, err := types.ParseFIL(cctx.Args().Get(2))
-	if err != nil {
-		return nil, err
-	}
-
-	var method uint64
-	var params []byte
-	if cctx.Args().Len() == 5 {
-		m, err := strconv.ParseUint(cctx.Args().Get(3), 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		method = m
-
-		p, err := hex.DecodeString(cctx.Args().Get(4))
-		if err != nil {
-			return nil, err
-		}
-		params = p
-	}
-
-	from, err := address.NewFromString(cctx.String("from"))
-	if err != nil {
-		return nil, err
-	}
-
-	m := abi.MethodNum(method)
-
-	enc, actErr := actors.SerializeParams(&multisig.ProposeParams{
-		To:     dest,
-		Value:  types.BigInt(value),
-		Method: m,
-		Params: params,
-	})
-	if actErr != nil {
-		return nil, xerrors.Errorf("failed to serialize parameters: %w", actErr)
-	}
-
-	msg := &types.Message{
-		From:   from,
-		To:     msig,
-		Value:  abi.NewTokenAmount(0),
-		Method: builtin.MethodsMultisig.Propose,
-		Params: enc,
-	}
-	if err := setGasParamsFromCCtx(cctx, msg); err != nil {
-		return nil, err
-	}
-	return msg, nil
 }
 
 func setGasParamsFromCCtx(cctx *cli.Context, msg *types.Message) error {

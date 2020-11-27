@@ -5,75 +5,119 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/filecoin-project/go-jsonrpc"
-	"github.com/filecoin-project/lotus/api"
-	"github.com/filecoin-project/lotus/api/apistruct"
+	"github.com/filecoin-project/lotus/build"
 	"github.com/filecoin-project/lotus/chain/types"
+	"github.com/filecoin-project/lotus/lib/lotuslog"
 	"github.com/filecoin-project/specs-actors/actors/builtin/multisig"
-	"github.com/ipfs/go-cid"
-	"net/http"
+	lcli "github.com/guoxiaopeng875/lotus-adapter/cmd/cli"
+	logging "github.com/ipfs/go-log/v2"
+	"github.com/urfave/cli/v2"
+	"os"
 )
 
+var log = logging.Logger("main")
+
 func main() {
-	var (
-		msgHex    string = "828a005502a1746faf1e35c9e5f6ee8ac3d9c82eb070fcc8a855019e2f835f28f3bc1d88bbb6664fc5d18ab98c6e9304401a02bffea844000f74cc44000f4ba003438200405842016ed7b74acc97f0c49af2e769fd1ea40cc2724d88cf4c8d835b32e385c899f4bc04db70b8904093f804a25c5bdb0a28f7561c6539445443cb8da983ae53cb487b00"
-		addr      string = "http://172.30.9.77:1234/rpc/v0"
-		authToken string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.PEhuw-RV-8xFVlIT2uJAtB7GyqMtJUnqJNO-vsyoO8o"
-	)
-	ctx := context.Background()
-	api, closer, err := NewFullNodeAPI(addr, authToken)
-	if err != nil {
-		panic(err)
-	}
-	defer closer()
-	msgBytes, err := hex.DecodeString(msgHex)
-	if err != nil {
-		panic(err)
-	}
-	sm, err := types.DecodeSignedMessage(msgBytes)
-	if err != nil {
-		panic(err)
-	}
-	cid, err := api.MpoolPush(ctx, sm)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(cid.String())
+	lotuslog.SetupLogLevels()
 
-	if err := checkMessage(api, cid); err != nil {
-		panic(err)
+	local := []*cli.Command{
+		pushCmd,
+	}
+
+	app := &cli.App{
+		Name:     "mpool-push",
+		Usage:    "lotus push message",
+		Version:  build.UserVersion(),
+		Commands: local,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "repo",
+				EnvVars: []string{"LOTUS_PATH"},
+				Value:   "~/.lotus", // TODO: Consider XDG_DATA_HOME
+			},
+		},
+	}
+	app.Setup()
+
+	if err := app.Run(os.Args); err != nil {
+		log.Warnf("%+v", err)
+		return
 	}
 }
 
-func checkMessage(api api.FullNode, mCid cid.Cid) error {
-	ctx := context.Background()
-	wait, err := api.StateWaitMsg(ctx, mCid, 0)
-	if err != nil {
-		return err
-	}
+var pushCmd = &cli.Command{
+	Name:  "push",
+	Usage: "push message",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "msg",
+			Usage: "message data",
+			Value: "",
+		},
+		&cli.BoolFlag{
+			Name:  "wait",
+			Usage: "wait message on chain",
+			Value: false,
+		},
+		&cli.BoolFlag{
+			Name:  "propose",
+			Usage: "check mutisig propose message",
+			Value: false,
+		},
+		&cli.Uint64Flag{
+			Name:  "confidence",
+			Usage: "wait message confidence depth",
+			Value: 0,
+		},
+	},
+	Action: func(cctx *cli.Context) error {
 
-	if wait.Receipt.ExitCode != 0 {
-		return fmt.Errorf("proposal returned exit %d", wait.Receipt.ExitCode)
-	}
+		ctx := lcli.ReqContext(cctx)
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
 
-	var retval multisig.ProposeReturn
-	if err := retval.UnmarshalCBOR(bytes.NewReader(wait.Receipt.Return)); err != nil {
-		return fmt.Errorf("failed to unmarshal propose return value: %w", err)
-	}
+		api, closer, err := lcli.GetFullNodeAPI(cctx)
+		if err != nil {
+			return err
+		}
+		defer closer()
 
-	fmt.Printf("Transaction ID: %d\n", retval.TxnID)
-	if retval.Applied {
-		fmt.Printf("Transaction was executed during propose\n")
-		fmt.Printf("Exit Code: %d\n", retval.Code)
-		fmt.Printf("Return Value: %x\n", retval.Ret)
-	}
+		msgBytes, err := hex.DecodeString(cctx.String("msg"))
+		if err != nil {
+			return err
+		}
+		sm, err := types.DecodeSignedMessage(msgBytes)
+		if err != nil {
+			return err
+		}
+		cid, err := api.MpoolPush(ctx, sm)
+		if err != nil {
+			return err
+		}
+		fmt.Println(cid.String())
+		if cctx.Bool("wait") {
+			wait, err := api.StateWaitMsg(ctx, cid, cctx.Uint64("confidence"))
+			if err != nil {
+				return err
+			}
+			if wait.Receipt.ExitCode != 0 {
+				return fmt.Errorf("proposal returned exit %d", wait.Receipt.ExitCode)
+			}
+			if cctx.Bool("propose") {
+				var retval multisig.ProposeReturn
+				if err := retval.UnmarshalCBOR(bytes.NewReader(wait.Receipt.Return)); err != nil {
+					return fmt.Errorf("failed to unmarshal propose return value: %w", err)
+				}
 
-	return nil
-}
+				fmt.Printf("Transaction ID: %d\n", retval.TxnID)
+				if retval.Applied {
+					fmt.Printf("Transaction was executed during propose\n")
+					fmt.Printf("Exit Code: %d\n", retval.Code)
+					fmt.Printf("Return Value: %x\n", retval.Ret)
+				}
+			}
+		}
 
-func NewFullNodeAPI(addr, authToken string) (api.FullNode, jsonrpc.ClientCloser, error) {
-	headers := http.Header{"Authorization": []string{"Bearer " + authToken}}
-	var fullNode apistruct.FullNodeStruct
-	closer, err := jsonrpc.NewMergeClient(context.Background(), addr, "Filecoin", []interface{}{&fullNode.Internal, &fullNode.CommonStruct.Internal}, headers)
-	return &fullNode, closer, err
+		return nil
+	},
 }

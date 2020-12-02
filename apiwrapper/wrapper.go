@@ -157,6 +157,10 @@ func (c *LotusAPIWrapper) MinerAssetInfo(ctx context.Context, mAddr address.Addr
 	if err != nil {
 		return nil, err
 	}
+	ownerBls, err := nodeApi.WalletBalance(ctx, mi.Owner)
+	if err != nil {
+		return nil, err
+	}
 	return &apitypes.ClusterAssetInfo{
 		MinerID:                  mAddr.String(),
 		MinerBalance:             mAct.Balance,
@@ -167,6 +171,7 @@ func (c *LotusAPIWrapper) MinerAssetInfo(ctx context.Context, mAddr address.Addr
 		PostBalance:              postBls,
 		WorkerBalance:            wBls,
 		QualityAdjPower:          power.MinerPower.QualityAdjPower,
+		OwnerBalance:             ownerBls,
 	}, nil
 }
 

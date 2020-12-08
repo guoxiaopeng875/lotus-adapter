@@ -12,6 +12,8 @@ import (
 	"github.com/filecoin-project/lotus/chain/store"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/cli"
+	"github.com/filecoin-project/lotus/extern/sector-storage/fsutil"
+	"github.com/filecoin-project/lotus/extern/sector-storage/stores"
 	"github.com/filecoin-project/lotus/lib/blockstore"
 	"github.com/filecoin-project/lotus/lib/bufbstore"
 	"github.com/filecoin-project/lotus/storage"
@@ -19,9 +21,16 @@ import (
 	"github.com/hako/durafmt"
 	cbor "github.com/ipfs/go-ipld-cbor"
 	"golang.org/x/xerrors"
+	"sort"
 	"strings"
 	"time"
 )
+
+type fsInfo struct {
+	stores.ID
+	sectors []stores.Decl
+	stat    fsutil.FsStat
+}
 
 type LotusAPIWrapper struct {
 	api.FullNode
@@ -240,4 +249,53 @@ func (c *LotusAPIWrapper) WorkerTaskInfo() ([]*apitypes.WorkerTaskState, error) 
 		wtStates = append(wtStates, wts)
 	}
 	return wtStates, nil
+}
+
+func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
+	minerAPI := c.StorageMiner
+	ctx := context.Background()
+
+	st, err := minerAPI.StorageList(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	sorted := make([]*fsInfo, 0, len(st))
+	for id, decls := range st {
+		st, err := minerAPI.StorageStat(ctx, id)
+		if err != nil {
+			sorted = append(sorted, &fsInfo{ID: id, sectors: decls})
+			continue
+		}
+
+		sorted = append(sorted, &fsInfo{id, decls, st})
+	}
+
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].stat.Capacity != sorted[j].stat.Capacity {
+			return sorted[i].stat.Capacity > sorted[j].stat.Capacity
+		}
+		return sorted[i].ID < sorted[j].ID
+	})
+
+	storageInfos := make([]*apitypes.StorageInfo, len(sorted))
+	for i, fs := range sorted {
+		storageInfos[i] = &apitypes.StorageInfo{
+			ID:        string(fs.ID),
+			Sectors:   make([]*apitypes.Decl, len(fs.sectors)),
+			Capacity:  fs.stat.Capacity,
+			Available: fs.stat.Available,
+			Reserved:  fs.stat.Reserved,
+		}
+
+		for j, sector := range fs.sectors {
+			storageInfos[i].Sectors[j] = &apitypes.Decl{
+				Miner:          sector.Miner.String(),
+				SectorNumber:   sector.Number.String(),
+				SectorFileType: sector.SectorFileType.String(),
+			}
+		}
+	}
+
+	return storageInfos, nil
 }

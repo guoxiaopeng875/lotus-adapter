@@ -56,6 +56,7 @@ type PushedMinerInfo struct {
 	MinerSectorsInfo *MinerSectorsInfo  `json:"miner_sectors_info"`
 	WorkerTaskState  []*WorkerTaskState `json:"worker_task_state"`
 	ClusterAssetInfo *ClusterAssetInfo  `json:"cluster_asset_info"`
+	StorageInfo      []*StorageInfo     `json:"storage_info"`
 }
 
 // worker任务状态
@@ -73,4 +74,18 @@ type SectorState struct {
 	Start     time.Time `json:"start"`
 	RunWait   int       `json:"run_wait"` // 0 - running, 1+ - assigned
 	TaskTime  int64     `json:"task_time,omitempty"`
+}
+
+type StorageInfo struct {
+	ID        string  `json:"id"`
+	Sectors   []*Decl `json:"sectors"`
+	Capacity  int64
+	Available int64 // Available to use for sector storage
+	Reserved  int64
+}
+
+type Decl struct {
+	Miner          string `json:"miner"`
+	SectorNumber   string `json:"sector_number"`
+	SectorFileType string `json:"sector_file_type"`
 }

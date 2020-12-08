@@ -82,6 +82,10 @@ type StorageInfo struct {
 	Capacity  int64
 	Available int64 // Available to use for sector storage
 	Reserved  int64
+	URLs      []string // TODO: Support non-http transports
+	Weight    uint64
+	CanSeal   bool
+	CanStore  bool
 }
 
 type Decl struct {

@@ -280,12 +280,21 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 
 	storageInfos := make([]*apitypes.StorageInfo, len(sorted))
 	for i, fs := range sorted {
+		info, err := minerAPI.StorageInfo(ctx, fs.ID)
+		if err != nil {
+			return nil, err
+		}
+
 		storageInfos[i] = &apitypes.StorageInfo{
 			ID:        string(fs.ID),
 			Sectors:   make([]*apitypes.Decl, len(fs.sectors)),
 			Capacity:  fs.stat.Capacity,
 			Available: fs.stat.Available,
 			Reserved:  fs.stat.Reserved,
+			URLs:      info.URLs,
+			Weight:    info.Weight,
+			CanSeal:   info.CanSeal,
+			CanStore:  info.CanStore,
 		}
 
 		for j, sector := range fs.sectors {

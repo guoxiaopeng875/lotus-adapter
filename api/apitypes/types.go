@@ -77,15 +77,16 @@ type SectorState struct {
 }
 
 type StorageInfo struct {
-	ID        string  `json:"id"`
-	Sectors   []*Decl `json:"sectors"`
-	Capacity  int64
-	Available int64 // Available to use for sector storage
-	Reserved  int64
-	URLs      []string // TODO: Support non-http transports
-	Weight    uint64
-	CanSeal   bool
-	CanStore  bool
+	ID        string   `json:"id"`
+	Sectors   []*Decl  `json:"sectors"`
+	Capacity  int64    `json:"capacity"`
+	Available int64    `json:"available"` // Available to use for sector storage
+	Reserved  int64    `json:"reserved"`
+	URLs      []string `json:"ur_ls"` // TODO: Support non-http transports
+	Weight    uint64   `json:"weight"`
+	CanSeal   bool     `json:"can_seal"`
+	CanStore  bool     `json:"can_store"`
+	Local     string   `json:"local"`
 }
 
 type Decl struct {

@@ -259,6 +259,11 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	
+	local, err := minerAPI.StorageLocal(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	sorted := make([]*fsInfo, 0, len(st))
 	for id, decls := range st {
@@ -295,6 +300,7 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 			Weight:    info.Weight,
 			CanSeal:   info.CanSeal,
 			CanStore:  info.CanStore,
+			Local:     local[fs.ID],
 		}
 
 		for j, sector := range fs.sectors {

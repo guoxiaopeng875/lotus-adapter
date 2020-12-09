@@ -314,3 +314,55 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 
 	return storageInfos, nil
 }
+
+func (c *LotusAPIWrapper) GetWorkerAlert() ([]*apitypes.Alert, error) {
+	// 查询worker状态
+	stats, err := c.getWorkerStats()
+	if err != nil {
+		return nil, err
+	}
+	
+	alerts := make([]*apitypes.Alert, 0)
+	now := time.Now()
+	for _, st := range stats {
+		if st.Enabled {
+			continue
+		}
+		alerts = append(alerts, &apitypes.Alert{
+			Type:       "worker",
+			ReportTime: &now,
+			Content:    fmt.Sprintf("WorkerId:%d, Host:%s, Enabled:false", st.WorkerId, st.Hostname),
+		})
+	}
+
+	return alerts, nil
+}
+
+func (c *LotusAPIWrapper) getWorkerStats() ([]*apitypes.WorkerSortableStat, error) {
+	ctx := context.Background()
+	node := c.StorageMiner
+
+	stats, err := node.WorkerStats(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	st := make([]*apitypes.WorkerSortableStat, 0, len(stats))
+	for id, stat := range stats {
+		st = append(st, &apitypes.WorkerSortableStat{
+			WorkerId:    id,
+			Hostname:    stat.Info.Hostname,
+			Enabled:     stat.Enabled,
+			MemPhysical: stat.Info.Resources.MemPhysical,
+			MemSwap:     stat.Info.Resources.MemSwap,
+			MemReserved: stat.Info.Resources.MemReserved,
+			CPUs:        stat.Info.Resources.CPUs,
+			GPUs:        stat.Info.Resources.GPUs,
+			MemUsedMin:  stat.MemUsedMin,
+			MemUsedMax:  stat.MemUsedMax,
+			GpuUsed:     stat.GpuUsed,
+			CpuUse:      stat.CpuUse,
+		})
+	}
+	return st, nil
+}

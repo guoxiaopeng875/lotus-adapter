@@ -84,7 +84,7 @@ type StorageInfo struct {
 	Capacity  int64    `json:"capacity"`
 	Available int64    `json:"available"` // Available to use for sector storage
 	Reserved  int64    `json:"reserved"`
-	URLs      []string `json:"ur_ls"` // TODO: Support non-http transports
+	URLs      []string `json:"urls"` // TODO: Support non-http transports
 	Weight    uint64   `json:"weight"`
 	CanSeal   bool     `json:"can_seal"`
 	CanStore  bool     `json:"can_store"`

@@ -1,9 +1,9 @@
 package apitypes
 
 import (
+	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/go-state-types/abi"
 	"github.com/filecoin-project/go-state-types/big"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -58,7 +58,7 @@ type PushedMinerInfo struct {
 	WorkerTaskState  []*WorkerTaskState `json:"worker_task_state"`
 	ClusterAssetInfo *ClusterAssetInfo  `json:"cluster_asset_info"`
 	StorageInfo      []*StorageInfo     `json:"storage_info"`
-	Alerts           []*Alert           `json:"alerts"`
+	MessageCount     int                `json:"message_count"`
 }
 
 // worker任务状态
@@ -97,23 +97,18 @@ type Decl struct {
 	SectorFileType string `json:"sector_file_type"`
 }
 
-type Alert struct {
-	Type       string     `json:"type"`
-	ReportTime *time.Time `json:"report_time"`
-	Content    string     `json:"content"`
-}
-
-type WorkerSortableStat struct {
-	WorkerId    uuid.UUID `json:"worker_id"`
-	Hostname    string    `json:"hostname"`
-	Enabled     bool      `json:"enabled"`
-	MemPhysical uint64    `json:"mem_physical"`
-	MemSwap     uint64    `json:"mem_swap"`
-	MemReserved uint64    `json:"mem_reserved"` // Used by system / other processes
-	CPUs        uint64    `json:"cpus"`         // Logical cores
-	GPUs        []string  `json:"gpus"`
-	MemUsedMin  uint64    `json:"mem_used_min"`
-	MemUsedMax  uint64    `json:"mem_used_max"`
-	GpuUsed     bool      `json:"gpu_used"` // nolint
-	CpuUse      uint64    `json:"cpu_use"`  // nolint
+type Message struct {
+	ID         string          `json:"id"`
+	Version    uint64          `json:"version"`
+	To         address.Address `json:"to"`
+	From       address.Address `json:"from"`
+	Nonce      uint64          `json:"nonce"`
+	Value      abi.TokenAmount `json:"value"`
+	GasLimit   int64           `json:"gas_limit"`
+	GasFeeCap  abi.TokenAmount `json:"gas_fee_cap"`
+	GasPremium abi.TokenAmount `json:"gas_premium"`
+	Method     abi.MethodNum   `json:"method"`
+	Params     []byte          `json:"params"`
+	Type       string          `json:"type"`
+	Data       []byte          `json:"data"`
 }

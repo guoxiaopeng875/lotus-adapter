@@ -66,15 +66,17 @@ func (p *Processor) getPushedMinerInfo(mAddr address.Address, apiWrapper *apiwra
 	if err != nil {
 		return nil, err
 	}
+
 	storageInfo, err := apiWrapper.GetStorageInfo()
 	if err != nil {
 		return nil, err
 	}
 
-	alerts, err := apiWrapper.GetWorkerAlert()
+	msgs, err := apiWrapper.GetMpoolPending()
 	if err != nil {
 		return nil, err
 	}
+
 	return &apitypes.PushedMinerInfo{
 		MinerID:          mAddr.String(),
 		ProvingInfo:      pi,
@@ -82,6 +84,6 @@ func (p *Processor) getPushedMinerInfo(mAddr address.Address, apiWrapper *apiwra
 		WorkerTaskState:  wti,
 		ClusterAssetInfo: cai,
 		StorageInfo:      storageInfo,
-		Alerts:           alerts,
+		MessageCount:     len(msgs),
 	}, nil
 }

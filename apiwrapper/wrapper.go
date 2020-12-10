@@ -259,7 +259,7 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	local, err := minerAPI.StorageLocal(ctx)
 	if err != nil {
 		return nil, err
@@ -315,54 +315,51 @@ func (c *LotusAPIWrapper) GetStorageInfo() ([]*apitypes.StorageInfo, error) {
 	return storageInfos, nil
 }
 
-func (c *LotusAPIWrapper) GetWorkerAlert() ([]*apitypes.Alert, error) {
-	// 查询worker状态
-	stats, err := c.getWorkerStats()
-	if err != nil {
-		return nil, err
-	}
-	
-	alerts := make([]*apitypes.Alert, 0)
-	now := time.Now()
-	for _, st := range stats {
-		if st.Enabled {
-			continue
-		}
-		alerts = append(alerts, &apitypes.Alert{
-			Type:       "worker",
-			ReportTime: &now,
-			Content:    fmt.Sprintf("WorkerId:%d, Host:%s, Enabled:false", st.WorkerId, st.Hostname),
-		})
-	}
-
-	return alerts, nil
-}
-
-func (c *LotusAPIWrapper) getWorkerStats() ([]*apitypes.WorkerSortableStat, error) {
+func (c *LotusAPIWrapper) GetMpoolPending() ([]*apitypes.Message, error) {
 	ctx := context.Background()
-	node := c.StorageMiner
+	node := c.FullNode
+	filter := map[address.Address]struct{}{}
+	addrss, err := node.WalletList(ctx)
+	if err != nil {
+		return nil, xerrors.Errorf("getting local addresses: %w", err)
+	}
 
-	stats, err := node.WorkerStats(ctx)
+	for _, a := range addrss {
+		filter[a] = struct{}{}
+	}
+
+	msgs, err := node.MpoolPending(ctx, types.EmptyTSK)
 	if err != nil {
 		return nil, err
 	}
 
-	st := make([]*apitypes.WorkerSortableStat, 0, len(stats))
-	for id, stat := range stats {
-		st = append(st, &apitypes.WorkerSortableStat{
-			WorkerId:    id,
-			Hostname:    stat.Info.Hostname,
-			Enabled:     stat.Enabled,
-			MemPhysical: stat.Info.Resources.MemPhysical,
-			MemSwap:     stat.Info.Resources.MemSwap,
-			MemReserved: stat.Info.Resources.MemReserved,
-			CPUs:        stat.Info.Resources.CPUs,
-			GPUs:        stat.Info.Resources.GPUs,
-			MemUsedMin:  stat.MemUsedMin,
-			MemUsedMax:  stat.MemUsedMax,
-			GpuUsed:     stat.GpuUsed,
-			CpuUse:      stat.CpuUse,
-		})
+	result := make([]*apitypes.Message, len(msgs))
+	for i, msg := range msgs {
+		if len(filter) == 0 {
+			if _, has := filter[msg.Message.From]; !has {
+				continue
+			}
+		}
+
+		typ, er := msg.Signature.Type.Name()
+		if er != nil {
+			typ = "unknown"
+		}
+		result[i] = &apitypes.Message{
+			ID:         msg.Cid().String(),
+			Version:    msg.Message.Version,
+			To:         msg.Message.To,
+			From:       msg.Message.From,
+			Nonce:      msg.Message.Nonce,
+			Value:      msg.Message.Value,
+			GasLimit:   msg.Message.GasLimit,
+			GasFeeCap:  msg.Message.GasFeeCap,
+			GasPremium: msg.Message.GasPremium,
+			Method:     msg.Message.Method,
+			Params:     msg.Message.Params,
+			Type:       typ,
+			Data:       msg.Signature.Data,
+		}
 	}
-	return st, nil
+	return result, nil
 }

@@ -333,8 +333,8 @@ func (c *LotusAPIWrapper) GetMpoolPending() ([]*apitypes.Message, error) {
 		return nil, err
 	}
 
-	result := make([]*apitypes.Message, len(msgs))
-	for i, msg := range msgs {
+	result := make([]*apitypes.Message, 0)
+	for _, msg := range msgs {
 		if len(filter) == 0 {
 			if _, has := filter[msg.Message.From]; !has {
 				continue
@@ -345,7 +345,7 @@ func (c *LotusAPIWrapper) GetMpoolPending() ([]*apitypes.Message, error) {
 		if er != nil {
 			typ = "unknown"
 		}
-		result[i] = &apitypes.Message{
+		result = append(result, &apitypes.Message{
 			ID:         msg.Cid().String(),
 			Version:    msg.Message.Version,
 			To:         msg.Message.To,
@@ -359,7 +359,7 @@ func (c *LotusAPIWrapper) GetMpoolPending() ([]*apitypes.Message, error) {
 			Params:     msg.Message.Params,
 			Type:       typ,
 			Data:       msg.Signature.Data,
-		}
+		})
 	}
 	return result, nil
 }
